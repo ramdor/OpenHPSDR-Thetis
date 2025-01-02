@@ -63,11 +63,21 @@ namespace Thetis
             }
         }
 
+        private int m_displayBits = 7;
+        public int DisplayBits
+        {
+            get { return m_displayBits; }
+            set
+            {
+                m_displayBits = value;
+            }
+        }
+
         private void usOCLedStrip_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
 
-            for(int nPin = 0; nPin < 7; nPin++)
+            for(int nPin = 0; nPin < m_displayBits; nPin++)
             {
                 int x = nPin * 16;
 

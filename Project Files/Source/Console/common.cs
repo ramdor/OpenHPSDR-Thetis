@@ -1406,6 +1406,8 @@ namespace Thetis
             {
                 case "HERMES":
                     return HPSDRModel.HERMES;
+                case "HERMES LITE":
+                    return HPSDRModel.HERMESLITE;
                 case "ANAN-10":
                     return HPSDRModel.ANAN10;
                 case "ANAN-10E":

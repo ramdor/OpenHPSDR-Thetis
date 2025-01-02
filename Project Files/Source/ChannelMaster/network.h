@@ -37,6 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define MAX_SYNC_RX             (2)
 #define CACHE_ALIGN __declspec (align(16))
 
+// MI0BOT: For I2C use on HL2
+#define MAX_I2C_QUEUE			(32)
+
 #define MAX_IN_SEQ_LOG			(40)
 #define MAX_IN_SEQ_SNAPSHOTS	(20)
 
@@ -101,6 +104,44 @@ typedef struct CACHE_ALIGN _radionet
 	WSANETWORKEVENTS wsaProcessEvents;
 
 	int hardware_LEDs;
+	int reset_on_disconnect;	// MI0BOT: Reset on software disconnect
+
+	struct _i2c	// MI0BOT: I2C data structure for HL2
+	{
+#pragma pack(push, 1)
+		union
+		{
+			unsigned char i2c_control;
+			struct {
+				unsigned char ctrl_read : 1, // bit 00
+							  ctrl_stop : 1, // bit 01   
+						   ctrl_request : 1, // bit 02
+						     ctrl_error : 1, // bit 03
+					ctrl_read_available : 1, // bit 04
+					                    : 1, // bit 05
+					                    : 1, // bit 06
+					                    : 1; // bit 07
+			};
+		};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+		struct {
+			unsigned char bus;
+			unsigned char address;
+			unsigned char control;
+			unsigned char write_data;
+		} i2c_queue[MAX_I2C_QUEUE];
+#pragma pack(pop)
+
+		unsigned char in_index;
+		unsigned char out_index;
+		  signed char delay;
+
+		unsigned char returned_address;
+		unsigned char read_data[4];
+
+	} i2c;
 
 	// puresignal settings
 	int puresignal_run;
@@ -213,6 +254,7 @@ typedef struct CACHE_ALIGN _radionet
 		int frequency;
 		int sampling_rate;
 		int cwx;
+		int cwx_ptt;	// MI0BOT: CWX enhancement for PTT on HL2
 		int dash;
 		int dot;
 		int ptt_out;
@@ -224,6 +266,8 @@ typedef struct CACHE_ALIGN _radionet
 		int epwm_max;
 		int epwm_min;
 		int pa;
+		int tx_latency;	// MI0BOT: Delay in TX buffer
+		int ptt_hang;	// MI0BOT: Delay before PTT drops out after TX buffer empties 
 		unsigned mic_in_seq_no;
 		unsigned mic_in_seq_err;
 		unsigned mic_out_seq_no;
@@ -403,6 +447,7 @@ int ApolloATU;
 
 int WSAinitialized;
 SOCKET listenSock;
+int RemotePort;		// MI0BOT: Allows different remote port for WAN access
 SYSTEMTIME lt;
 static const double const_1_div_2147483648_ = 1.0 / 2147483648.0;
 
@@ -421,11 +466,12 @@ enum _RXPort
 enum HPSDRHW
 {
 	Atlas = 0,
-	Hermes = 1,   // ANAN-10/100
-	HermesII = 2, // ANAN-10E/100B
-	Angelia = 3,  // ANAN-100D
-	Orion = 4,    // ANAN-200D
-	OrionMKII = 5 // ANAN-7000DLE/8000DLE AnvelinaPro3
+	Hermes = 1,    // ANAN-10/100
+	HermesII = 2,  // ANAN-10E/100B
+	Angelia = 3,   // ANAN-100D
+	Orion = 4,     // ANAN-200D
+	OrionMKII = 5, // ANAN-7000DLE/8000DLE AnvelinaPro3
+	HermesLite = 6 // MI0BOT: HL2 allocated number
 };
 
 enum _RadioProtocol
@@ -437,7 +483,9 @@ enum _RadioProtocol
 // Protocol 1 USB
 DWORD WINAPI MetisReadThreadMain(LPVOID n);
 void WriteMainLoop(char* bufp);
+void WriteMainLoop_HL2(char* bufp);		// MI0BOT: Different write loop for HL2
 void MetisReadThreadMainLoop(void);
+void MetisReadThreadMainLoop_HL2(void);	// MI0BOT: Different read loop for HL2
 DWORD WINAPI  sendProtocol1Samples(LPVOID n);
  int MetisReadDirect(unsigned char* bufp);
  int MetisWriteFrame(int endpoint, char* bufp);

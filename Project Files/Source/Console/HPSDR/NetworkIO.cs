@@ -25,6 +25,10 @@ namespace Thetis
     using System.Net;
     using System.Net.Sockets;
     using System.Net.NetworkInformation;
+    using SharpDX.Direct2D1;
+    using System.Diagnostics;
+    using System.Reflection;
+    using System.Windows.Forms;
 
     partial class NetworkIO
     {
@@ -66,17 +70,20 @@ namespace Thetis
         // set an endpoint
         static IPEndPoint iep;
         static byte[] data = new byte[1444];
-        const int DiscoveryPort = 1024;
+        public static int DiscoveryPort { get; set; } = 1024;   // MI0BOT: Allows the discover port to be changed
         const int LocalPort = 0;
         public static bool enableStaticIP { get; set; } = false;
+        public static bool enableLimitSubnet { get; set; } = true; // MI0BOT Flag to control limiting to subnet for discovery 
         public static uint static_host_network { get; set; } = 0;
         public static bool FastConnect { get; set; } = false;
         public static HPSDRHW BoardID { get; set; } = HPSDRHW.Hermes;
         public static byte FWCodeVersion { get; set; } = 0;
+  		public static byte FWCodeVersionMinor { get; set; } = 0; // MI0BOT: Minor revision for Hermes Lite
         public static byte BetaVersion { get; set; } = 0;
         public static byte ProtocolSupported { get; set; } = 0;        
         public static string EthernetHostIPAddress { get; set; } = "";
         public static int EthernetHostPort { get; set; } = 0;
+        public static int EthernetRemotePort { get; set; } = 0; // MI0BOT: Remote port for WAN access to allow for several HL2s
         public static string HpSdrHwIpAddress { get; set; } = "";
         public static string HpSdrHwMacAddress { get; set; } = "";
         public static byte NumRxs { get; set; } = 0;
@@ -145,8 +152,28 @@ namespace Thetis
             {
                 HpSdrHwIpAddress = Console.getConsole().HPSDRNetworkIPAddr;
 
-                IPAddress remoteIp = IPAddress.Parse(HpSdrHwIpAddress);
-                IPEndPoint remoteEndPoint = new IPEndPoint(remoteIp, 0);
+                IPAddress[] remoteIp = null;
+
+                // MI0BOT: Using call to get IP address which will work with dot addresses and URLs
+                // MI0BOT: Needed message box to report unknown host
+
+                try
+                {
+                    remoteIp = Dns.GetHostAddresses(HpSdrHwIpAddress);
+                }
+                catch (Exception)
+                {
+                    DialogResult dr = MessageBox.Show("Unknown host: " + HpSdrHwIpAddress,
+                        "IP Address error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, Common.MB_TOPMOST);
+
+                    return -1;
+                }
+
+                HpSdrHwIpAddress = remoteIp[0].ToString();
+
+                IPEndPoint remoteEndPoint = new IPEndPoint(remoteIp[0], 0);
                 Socket sock = new Socket(
                                       AddressFamily.InterNetwork,
                                       SocketType.Dgram,
@@ -264,12 +291,14 @@ namespace Thetis
             int chosenDevice = 0;
             BoardID = hpsdrd[chosenDevice].deviceType;
             FWCodeVersion = hpsdrd[chosenDevice].codeVersion;
+            FWCodeVersionMinor = hpsdrd[chosenDevice].codeVersionMinor; //MI0BOT: Minor revision for Hermes Lite
             BetaVersion = hpsdrd[chosenDevice].betaVersion;
             ProtocolSupported = hpsdrd[chosenDevice].protocolSupported;
             HpSdrHwIpAddress = hpsdrd[chosenDevice].IPAddress;
             HpSdrHwMacAddress = hpsdrd[chosenDevice].MACAddress;
             EthernetHostIPAddress = hpsdrd[chosenDevice].hostPortIPAddress.ToString();
             EthernetHostPort = hpsdrd[chosenDevice].localPort;
+            EthernetRemotePort = hpsdrd[chosenDevice].remotePort;
             NumRxs = hpsdrd[chosenDevice].numRxs;
 
             if (BoardID == HPSDRHW.HermesII)
@@ -281,7 +310,7 @@ namespace Thetis
                 }
             }
 
-            rc = nativeInitMetis(HpSdrHwIpAddress, EthernetHostIPAddress, EthernetHostPort, (int)CurrentRadioProtocol);
+            rc = nativeInitMetis(HpSdrHwIpAddress, EthernetHostIPAddress, EthernetHostPort, (int)CurrentRadioProtocol, EthernetRemotePort);
             return -rc;
         }
 
@@ -516,8 +545,8 @@ namespace Thetis
             Array.Clear(DiscoveryPacketP2, 0, DiscoveryPacketP2.Length);
             DiscoveryPacketP2[4] = 0x02;
 
-            bool radio_found = false;            // true when we find a radio
-            bool static_ip_ok = true;
+            bool radio_found = false;           // true when we find a radio
+            int static_ip_ok = 5;               // MI0BOT: Try the static IP 5 times before going to broadcast
             int time_out = 0;
 
             // set socket option so that broadcast is allowed.
@@ -545,7 +574,7 @@ namespace Thetis
             {
                 // send a broadcast to port 1024
                 // try target ip address 1 time if static
-                if (enableStaticIP && static_ip_ok)
+                if (enableStaticIP && (static_ip_ok-- > 0))
                     broadcast = new IPEndPoint(targetIP, DiscoveryPort);
                 else
                     // try directed broadcast address
@@ -583,6 +612,7 @@ namespace Thetis
 
                         string junk = Convert.ToString(remoteEP);  // see code in DataLoop
                         string[] words = junk.Split(':');
+                        int remotePort = Convert.ToInt32(words[1]);
                         System.Console.Write(words[1]);
 
                         //[2.10.3.5]MW0LGE sigh, MAC address in P1 is NOT at data[5], but at data[3]
@@ -648,12 +678,12 @@ namespace Thetis
                             System.Console.WriteLine("IP from IP Header = " + receivedIP);
                             System.Console.WriteLine("MAC address from payload = " + MAC);
 
-                            if (!SameSubnet(receivedIPAddr, hostPortIPAddress, hostPortMask))
+                            if ((enableLimitSubnet == true) && !SameSubnet(receivedIPAddr, hostPortIPAddress, hostPortMask))
                             {
                                 // device is NOT on the subnet that this port actually services.  Do NOT add to list!
                                 System.Console.WriteLine("Not on subnet of host adapter! Adapter IP {0}, Adapter mask {1}",
                                     hostPortIPAddress.ToString(), hostPortMask.ToString());
-                            }                         
+                            }
                             else if (MAC.Equals("00-00-00-00-00-00"))
                             {
                                 System.Console.WriteLine("Rejected: contains bogus MAC address of all-zeroes");
@@ -664,9 +694,11 @@ namespace Thetis
                                 {
                                     IPAddress = receivedIP,
                                     MACAddress = MAC,
+                                    remotePort = remotePort,
                                     deviceType = CurrentRadioProtocol == RadioProtocol.USB ? (HPSDRHW)data[10] : (HPSDRHW)data[11],
                                     protocolSupported = CurrentRadioProtocol == RadioProtocol.USB ? (byte)0 : data[12],
                                     codeVersion = CurrentRadioProtocol == RadioProtocol.USB ? data[9] : data[13],
+                                    codeVersionMinor = CurrentRadioProtocol == RadioProtocol.USB ? data[21] : (Byte) 0,
                                     hostPortIPAddress = hostPortIPAddress,
                                     localPort = localEndPoint.Port,
                                     MercuryVersion_0 = data[14],
@@ -700,6 +732,10 @@ namespace Thetis
                                         case 5:
                                             hpsdrd.deviceType = HPSDRHW.Orion;
                                             break;
+                                        case 6:
+                                            hpsdrd.deviceType = HPSDRHW.HermesLite;
+                                            SetDiscoveryBoardType((int)hpsdrd.deviceType);
+                                            break;
                                         case 10:
                                             hpsdrd.deviceType = HPSDRHW.OrionMKII;
                                             break;
@@ -731,7 +767,6 @@ namespace Thetis
                             System.Console.WriteLine("Time out!");
                             return false;
                         }
-                        static_ip_ok = false;
                     }
                 } while (data_available);
             }
@@ -834,8 +869,10 @@ namespace Thetis
     {
         public HPSDRHW deviceType;      // which type of device 
         public byte codeVersion;        // reported code version type
+        public byte codeVersionMinor;   // MI0BOT: reported minor code version in Hermes Lite
         public string IPAddress;        // IPV4 address
         public string MACAddress;       // physical (MAC) address
+        public int remotePort;          // MI0BOT: Remote port info to allow for different port access over WAN
         public IPAddress hostPortIPAddress;
         public int localPort;
         public byte MercuryVersion_0;

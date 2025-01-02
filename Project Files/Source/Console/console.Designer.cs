@@ -2060,6 +2060,7 @@
             this.chkEnableMultiRX.Name = "chkEnableMultiRX";
             this.toolTip1.SetToolTip(this.chkEnableMultiRX, resources.GetString("chkEnableMultiRX.ToolTip"));
             this.chkEnableMultiRX.CheckedChanged += new System.EventHandler(this.chkEnableMultiRX_CheckedChanged);
+            this.chkEnableMultiRX.MouseDown += new System.Windows.Forms.MouseEventHandler(this.chkEnableMultiRX_MouseDown);
             // 
             // chkDisplayPeak
             // 

@@ -78,6 +78,7 @@
         ANAN_G2,        //G8NJJ
         ANAN_G2_1K,     //G8NJJ
         ANVELINAPRO3,
+        HERMESLITE,     //MI0BOT
         LAST
     }
 
@@ -98,6 +99,7 @@
         ANAN_G2,        //G8NJJ
         ANAN_G2_1K,     //G8NJJ
         ANVELINAPRO3,
+        HERMESLITE,     //MI0BOT
         LAST
     }
 
@@ -364,7 +366,8 @@
         Angelia = 3,        // ANAN-100D
         Orion = 4,          // ANAN-200D
         OrionMKII = 5,      // AMAM-7000DLE 7000DLEMkII ANAN-8000DLE OrionMkII Anvelina-Pro3
-        Saturn = 10,         // ANAN-G2: added G8NJJ
+        HermesLite = 6,     // HermesLite 2 added MI0BOT
+        Saturn = 10,        // ANAN-G2: added G8NJJ
         Unknown = 999,      //MW0LGE
     }
 

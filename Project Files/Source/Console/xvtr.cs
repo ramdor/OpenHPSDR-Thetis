@@ -666,7 +666,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt15.Location = new System.Drawing.Point(842, 407);
             this.comboAnt15.Name = "comboAnt15";
             this.comboAnt15.Size = new System.Drawing.Size(52, 21);
@@ -682,7 +683,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt14.Location = new System.Drawing.Point(842, 382);
             this.comboAnt14.Name = "comboAnt14";
             this.comboAnt14.Size = new System.Drawing.Size(52, 21);
@@ -698,7 +700,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt13.Location = new System.Drawing.Point(842, 358);
             this.comboAnt13.Name = "comboAnt13";
             this.comboAnt13.Size = new System.Drawing.Size(52, 21);
@@ -714,7 +717,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt12.Location = new System.Drawing.Point(842, 332);
             this.comboAnt12.Name = "comboAnt12";
             this.comboAnt12.Size = new System.Drawing.Size(52, 21);
@@ -730,7 +734,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt11.Location = new System.Drawing.Point(842, 307);
             this.comboAnt11.Name = "comboAnt11";
             this.comboAnt11.Size = new System.Drawing.Size(52, 21);
@@ -746,7 +751,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt10.Location = new System.Drawing.Point(842, 283);
             this.comboAnt10.Name = "comboAnt10";
             this.comboAnt10.Size = new System.Drawing.Size(52, 21);
@@ -762,7 +768,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt9.Location = new System.Drawing.Point(842, 259);
             this.comboAnt9.Name = "comboAnt9";
             this.comboAnt9.Size = new System.Drawing.Size(52, 21);
@@ -778,7 +785,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt8.Location = new System.Drawing.Point(842, 235);
             this.comboAnt8.Name = "comboAnt8";
             this.comboAnt8.Size = new System.Drawing.Size(52, 21);
@@ -794,7 +802,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt7.Location = new System.Drawing.Point(842, 211);
             this.comboAnt7.Name = "comboAnt7";
             this.comboAnt7.Size = new System.Drawing.Size(52, 21);
@@ -810,7 +819,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt6.Location = new System.Drawing.Point(842, 187);
             this.comboAnt6.Name = "comboAnt6";
             this.comboAnt6.Size = new System.Drawing.Size(52, 21);
@@ -826,7 +836,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt5.Location = new System.Drawing.Point(842, 163);
             this.comboAnt5.Name = "comboAnt5";
             this.comboAnt5.Size = new System.Drawing.Size(52, 21);
@@ -842,7 +853,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt4.Location = new System.Drawing.Point(842, 139);
             this.comboAnt4.Name = "comboAnt4";
             this.comboAnt4.Size = new System.Drawing.Size(52, 21);
@@ -858,7 +870,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt3.Location = new System.Drawing.Point(842, 115);
             this.comboAnt3.Name = "comboAnt3";
             this.comboAnt3.Size = new System.Drawing.Size(52, 21);
@@ -874,7 +887,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt2.Location = new System.Drawing.Point(842, 91);
             this.comboAnt2.Name = "comboAnt2";
             this.comboAnt2.Size = new System.Drawing.Size(52, 21);
@@ -890,7 +904,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt1.Location = new System.Drawing.Point(842, 67);
             this.comboAnt1.Name = "comboAnt1";
             this.comboAnt1.Size = new System.Drawing.Size(52, 21);
@@ -906,7 +921,8 @@ namespace Thetis
             "def",
             "1",
             "2",
-            "3"});
+            "3",
+            "Alt Rx"});
             this.comboAnt0.Location = new System.Drawing.Point(842, 43);
             this.comboAnt0.Name = "comboAnt0";
             this.comboAnt0.Size = new System.Drawing.Size(52, 21);
@@ -5187,6 +5203,7 @@ namespace Thetis
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "XVTRForm";
             this.Text = "XVTR Setup";
+            this.Activated += new System.EventHandler(this.XVTRForm_Activated);
             this.Closing += new System.ComponentModel.CancelEventHandler(this.XVTRForm_Closing);
             ((System.ComponentModel.ISupportInitialize)(this.udRXGain15)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.udRXGain14)).EndInit();
@@ -6016,6 +6033,54 @@ namespace Thetis
             {
                 console.RX1XVTRIndex = -1; // force reset
                 console.VFOAFreq = console.VFOAFreq;
+            }
+        }
+
+        private void XVTRForm_Activated(object sender, EventArgs e)
+        {
+            if (console.SetupForm.HL2IOBoardPresent == true)    // MI0BOT: Make Alt rx option available only for the HL2 with I/O Board
+            {
+                if (!comboAnt0.Items.Contains("Alt Rx"))
+                {
+                    comboAnt0.Items.Add("Alt Rx");
+                    comboAnt1.Items.Add("Alt Rx");
+                    comboAnt2.Items.Add("Alt Rx");
+                    comboAnt3.Items.Add("Alt Rx");
+                    comboAnt4.Items.Add("Alt Rx");
+                    comboAnt5.Items.Add("Alt Rx");
+                    comboAnt6.Items.Add("Alt Rx");
+                    comboAnt7.Items.Add("Alt Rx");
+                    comboAnt8.Items.Add("Alt Rx");
+                    comboAnt9.Items.Add("Alt Rx");
+                    comboAnt10.Items.Add("Alt Rx");
+                    comboAnt11.Items.Add("Alt Rx");
+                    comboAnt12.Items.Add("Alt Rx");
+                    comboAnt13.Items.Add("Alt Rx");
+                    comboAnt14.Items.Add("Alt Rx");
+                    comboAnt15.Items.Add("Alt Rx");
+                }
+            }
+            else
+            {
+                if (comboAnt0.Items.Contains("Alt Rx"))
+                {
+                    comboAnt0.Items.Remove("Alt Rx");
+                    comboAnt1.Items.Remove("Alt Rx");
+                    comboAnt2.Items.Remove("Alt Rx");
+                    comboAnt3.Items.Remove("Alt Rx");
+                    comboAnt4.Items.Remove("Alt Rx");
+                    comboAnt5.Items.Remove("Alt Rx");
+                    comboAnt6.Items.Remove("Alt Rx");
+                    comboAnt7.Items.Remove("Alt Rx");
+                    comboAnt8.Items.Remove("Alt Rx");
+                    comboAnt9.Items.Remove("Alt Rx");
+                    comboAnt10.Items.Remove("Alt Rx");
+                    comboAnt11.Items.Remove("Alt Rx");
+                    comboAnt12.Items.Remove("Alt Rx");
+                    comboAnt13.Items.Remove("Alt Rx");
+                    comboAnt14.Items.Remove("Alt Rx");
+                    comboAnt15.Items.Remove("Alt Rx");
+                }
             }
         }
     }

@@ -429,6 +429,19 @@ namespace Thetis
 
         public static void CMLoadRouterAll(HPSDRModel model)
         {
+            int txinid = cmaster.inid(1, 0);        // stream id
+            int txch = cmaster.chid(txinid, 0);     // wdsp channel
+
+            // MI0BOT: Set correct SetPSHWPeak for HL2 and different model for reduced bandwidth
+
+            if (model != HPSDRModel.HERMESLITE)
+                puresignal.SetPSHWPeak(txch, 0.2899);
+
+            if (model == HPSDRModel.HERMESLITE && Audio.console.ReduceEthernetBW)
+            {
+                model = HPSDRModel.ANAN10E;
+            }
+
             switch (NetworkIO.CurrentRadioProtocol)
             {
                 case RadioProtocol.USB:
@@ -456,6 +469,7 @@ namespace Thetis
                                     LoadRouterAll((void*)0, 0, 1, 2, 8, pstreams, pfunction, pcallid);
                                 break;
                             case HPSDRModel.HERMES:
+                            case HPSDRModel.HERMESLITE: // MI0BOT: HL2
                             case HPSDRModel.ANAN10:
                             case HPSDRModel.ANAN100:
                                 int[] FOUR_DDC_Function = new int[48]
@@ -544,6 +558,7 @@ namespace Thetis
                                     LoadRouterAll((void*)0, 0, 1, /*1*/2, 8, pstreams, pfunction, pcallid); //MW0LGE_21d DUP on top panadaptor (Warren provided info)
                                 break;
                             case HPSDRModel.HERMES:
+                            case HPSDRModel.HERMESLITE: // MI0BOT: HL2
                             case HPSDRModel.ANAN10:
                             case HPSDRModel.ANAN100:
                                 int[] FOUR_DDC_Function = new int[24]
@@ -663,6 +678,7 @@ namespace Thetis
                                 break;
 
                             case HPSDRModel.HERMES:
+                            case HPSDRModel.HERMESLITE: // MI0BOT: HL2
                             case HPSDRModel.ANAN10:
                             case HPSDRModel.ANAN100:
                             case HPSDRModel.ANAN10E:
@@ -739,6 +755,7 @@ namespace Thetis
                                 break;
 
                             case HPSDRModel.HERMES:
+                            case HPSDRModel.HERMESLITE: // MI0BOT: HL2
                             case HPSDRModel.ANAN10:
                             case HPSDRModel.ANAN100:
                             case HPSDRModel.ANAN10E:

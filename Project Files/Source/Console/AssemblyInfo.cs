@@ -39,7 +39,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("OpenHPSDR")]
 [assembly: AssemblyProduct("Thetis")]
-[assembly: AssemblyCopyright("2023")]
+[assembly: AssemblyCopyright("2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]		
 

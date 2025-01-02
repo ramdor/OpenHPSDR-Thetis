@@ -581,6 +581,9 @@ void DisablePA(int bit)
 {
 	if (prn->tx[0].pa != bit) 
 	{
+		if (prn->discovery.BoardType == HermesLite)
+			EnableApolloTuner(!bit);	// MI0BOT: This call used on HL2 to enable/disable PA
+
 		prn->tx[0].pa = bit;		
 		if (listenSock != INVALID_SOCKET)
 			CmdGeneral();
@@ -764,6 +767,15 @@ void SetLineBoost(int bits)
 		prn->mic.line_in_gain = bits;
 		if (listenSock != INVALID_SOCKET)
 			CmdTx();
+	}
+}
+
+PORT // MI0BOT: Causes a HL2 to perform a reset on disconnect
+void SetResetOnDisconnect(int bit) 
+{
+	if (prn->reset_on_disconnect != bit)
+	{
+		prn->reset_on_disconnect = bit & 0x1;
 	}
 }
 
@@ -1132,6 +1144,17 @@ void SetCWX(int bit)
 	}
 }
 
+PORT // MI0BOT: On the HL2 the CWX protocol has been updated to pass PTT in Bit 3 
+void SetCWXPTT(int bit) 
+{
+	if (prn->tx[0].cwx_ptt != bit) 
+	{
+		prn->tx[0].cwx_ptt = bit;
+		if (listenSock != INVALID_SOCKET)
+			CmdHighPriority();
+	}
+}
+
 PORT
 int getHaveSync() 
 {
@@ -1364,6 +1387,144 @@ void LRAudioSwap (int swap)
 		prn->lr_audio_swap = swap;
 }
 
+PORT // MI0BOT: Board type is now discovered to allow different operations for the HL2
+void SetDiscoveryBoardType (int boardType)
+{
+	prn->discovery.BoardType = boardType;
+}
+
+PORT // MI0BOT: Controls the delay for PTT to Tx power out for HL2
+void SetTxLatency (int txLatency)
+{
+	prn->tx[0].tx_latency = txLatency;
+}
+
+PORT // MI0BOT: Determines the delay until Tx/Rx change over after Tx buffer empties for the HL2
+void SetPttHang (int pttHang)
+{
+	prn->tx[0].ptt_hang = pttHang;
+}
+
+PORT // MI0BOT: Initialises for a read of the I2C on the HL2
+int I2CReadInitiate(int bus, int address, int control)
+{
+	int return_code = -1;
+
+	// Only read when a sequence of writes are not in progress
+	// This is true only when the IN and OUT indexes are the same
+
+	if (prn->i2c.in_index == prn->i2c.out_index)
+	{
+		// Get the next free spot in the queue
+
+		unsigned char next = prn->i2c.in_index + 1 >= MAX_I2C_QUEUE ? 0 : prn->i2c.in_index + 1;
+
+		prn->i2c.i2c_queue[next].bus = bus;
+		prn->i2c.i2c_queue[next].address = address;
+		prn->i2c.i2c_queue[next].control = control;
+
+		prn->i2c.i2c_control = 0;	// Clear all the control bits
+		prn->i2c.ctrl_read = 1;
+		prn->i2c.ctrl_stop = 1;
+		prn->i2c.ctrl_request = 1;
+
+		prn->i2c.in_index = next;	// Move IN index on to start the transmission
+
+		return_code = 0;
+	}
+
+	return return_code;
+}
+
+PORT // MI0BOT: Initialises for a write of the I2C on the HL2 where a return is expected
+int I2CWriteInitiate(int bus, int address, int control, int data)
+{
+	int return_code = -1;
+
+	if (0 == prn->i2c.ctrl_read)
+	{
+		// Only proceed if read is not in progress
+
+		// Get the next index in the IN queue
+		unsigned char next = prn->i2c.in_index + 1 >= MAX_I2C_QUEUE ? 0 : prn->i2c.in_index + 1;
+
+		if (next != prn->i2c.out_index)
+		{
+			// Only proceed if the indexes are not the same, as that is the overflow condition
+
+			prn->i2c.i2c_queue[next].bus = bus;
+			prn->i2c.i2c_queue[next].address = address;
+			prn->i2c.i2c_queue[next].control = control;
+			prn->i2c.i2c_queue[next].write_data = data;
+
+			// We are expecting a response
+			prn->i2c.ctrl_request = 1;
+
+			// Move the index on to start the transmission
+			prn->i2c.in_index = next;
+
+			return_code = 0;
+		}
+	}
+
+	return return_code;
+}
+
+PORT // MI0BOT: Write to the I2C on the HL2 when a return is not expected
+int I2CWrite(int bus, int address, int control, int data)
+{
+	int return_code = -1;
+
+	if (0 == prn->i2c.ctrl_read)
+	{
+		// Only proceed if read is not in progress
+
+		// Get the next index in the IN queue
+		unsigned char next = prn->i2c.in_index + 1 >= MAX_I2C_QUEUE ? 0 : prn->i2c.in_index + 1;
+
+		if (next != prn->i2c.out_index)
+		{
+			// Only proceed if the indexs are not the same, as that is the overflow condition
+
+			prn->i2c.i2c_queue[next].bus = bus;
+			prn->i2c.i2c_queue[next].address = address;
+			prn->i2c.i2c_queue[next].control = control;
+			prn->i2c.i2c_queue[next].write_data = data;
+
+			// Move the index on to start the transmission
+			prn->i2c.in_index = next;
+
+			return_code = 0;
+		}
+	}
+
+	return return_code;
+}
+
+PORT // MI0BOT: Handles the I2C responses for the HL2
+int I2CResponse(unsigned char* read_data)
+{
+	int return_code = 1;
+
+	if (prn->i2c.ctrl_error)
+	{
+		return_code = -1;
+	}
+	else if (prn->i2c.ctrl_read_available)
+	{
+		prn->i2c.i2c_control = 0;
+
+		read_data[0] = prn->i2c.read_data[0];
+		read_data[1] = prn->i2c.read_data[1];
+		read_data[2] = prn->i2c.read_data[2];
+		read_data[3] = prn->i2c.read_data[3];
+
+		return_code = 0;
+	}
+
+	return return_code;
+}
+
 PORT
 void create_rnet() 
 {
@@ -1392,6 +1553,16 @@ void create_rnet()
 		prn->pll_locked = 0; //MW0LGE_21d
 		prn->cc_seq_no = 0;
 		prn->cc_seq_err = 0;
+
+		prn->i2c.i2c_control = 0;	// MI0BOT: HL2 I2C variables 
+		prn->i2c.returned_address = 0;
+		prn->i2c.read_data[0] = 0;
+		prn->i2c.read_data[1] = 0;
+		prn->i2c.read_data[2] = 0;
+		prn->i2c.read_data[3] = 0;
+		prn->i2c.in_index = 0;
+		prn->i2c.out_index = 0;
+		prn->i2c.delay = 0;
 
 		prn->cw.mode_control = 0;
 		prn->cw.sidetone_level = 0;
@@ -1461,6 +1632,7 @@ void create_rnet()
 			prn->tx[i].frequency = 0;
 			prn->tx[i].sampling_rate = 192;
 			prn->tx[i].cwx = 0;
+			prn->tx[i].cwx_ptt = 0;	// MI0BOT: HL2 control of PTT via CWX protocol
 			prn->tx[i].dash = 0;
 			prn->tx[i].dot = 0;
 			prn->tx[i].ptt_out = 0;
@@ -1469,6 +1641,8 @@ void create_rnet()
 			prn->tx[i].epwm_max = 0;
 			prn->tx[i].epwm_min = 0;
 			prn->tx[i].pa = 0;
+			prn->tx[i].tx_latency = 20;	// MI0BOT: HL2 
+			prn->tx[i].ptt_hang = 12;	// MI0BOT: HL2 
 			prn->tx[i].mic_in_seq_no = 0;
 			prn->tx[i].mic_in_seq_err = 0;
 			prn->tx[i].mic_out_seq_no = 0;
@@ -1482,6 +1656,8 @@ void create_rnet()
 
 		prn->puresignal_run = 0;
 
+		prn->reset_on_disconnect = 0;	// MI0BOT: Intialised to not reset on software disconnect
+		
 		for (i = 0; i < 6; i++)
 			prn->discovery.MACAddr[i] = 0;
 		prn->discovery.BoardType = 0;

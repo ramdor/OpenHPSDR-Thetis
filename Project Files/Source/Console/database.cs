@@ -10759,6 +10759,7 @@ namespace Thetis
                                 string sRad = "";
                                 if (getRadioSelectedFromOldRadButton(ref tempTable, "radGenModelHPSDR")) sRad = "HPSDR";
                                 else if (getRadioSelectedFromOldRadButton(ref tempTable, "radGenModelHermes")) sRad = "HERMES";
+                                else if (getRadioSelectedFromOldRadButton(ref tempTable, "radGenModelHermeslite")) sRad = "HERMES LITE";
                                 else if (getRadioSelectedFromOldRadButton(ref tempTable, "radGenModelANAN10")) sRad = "ANAN-10";
                                 else if (getRadioSelectedFromOldRadButton(ref tempTable, "radGenModelANAN10E")) sRad = "ANAN-10E";
                                 else if (getRadioSelectedFromOldRadButton(ref tempTable, "radGenModelANAN100")) sRad = "ANAN-100";

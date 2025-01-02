@@ -8,15 +8,15 @@
 <!-- 32-bit / 64-bit variables -->
 <?if $(var.Platform) = x64 ?>
 <?define Win64 = "yes" ?>
-<?define UpgradeCode = "DEC025E2-4B27-425D-8EFE-AD6F5F780D52"?>
-<?define ProductName = "Thetis (64-bit)" ?>
-<?define ThetisName = "Thetis-x64"?>
+<?define UpgradeCode = "1FB8D39E-FC39-4D30-BD10-F8DFD2F6C2D4"?>
+<?define ProductName = "Thetis HL2" ?>
+<?define ThetisName = "Thetis"?>
 <?define VC143 = "Microsoft_VC143_CRT_x64.msm" ?>
 <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
 <?define FilesPath = "..\..\Bin\$(var.Platform)\$(var.Configuration)\" ?>
 <?else ?>
 <?define Win64 = "no" ?>
-<?define UpgradeCode = "CE4756C9-3CA7-4A55-8980-7F0A920890DE"?>
+<?define UpgradeCode = "B888F619-2F38-4853-BE77-65DF1A224538"?>
 <?define ProductName = "Thetis (32-bit)" ?>
 <?define ThetisName = "Thetis"?>
 <?define VC143 = "Microsoft_VC143_CRT_x86.msm" ?>
@@ -65,6 +65,7 @@
       <ComponentGroupRef Id="ProductComponents" />
       <ComponentRef Id="StartMenuShortcut" />
       <ComponentRef Id="DesktopShortcut" />
+      <ComponentRef Id="DesktopShortcutHL2" />
     </Feature>
 
     <Feature Id="VC143Redist" Title="Visual C++ 14.3 Runtime" AllowAdvertise="no" Display="hidden" Level="1">
@@ -118,7 +119,7 @@
 
       <Directory Id="$(var.PlatformProgramFilesFolder)">
         <Directory Id="HPSDRFolder" Name="OpenHPSDR">
-          <Directory Id="INSTALLFOLDER" Name="Thetis">
+          <Directory Id="INSTALLFOLDER" Name="Thetis-HL2">
 		  </Directory>
         </Directory>
       </Directory>
@@ -138,13 +139,23 @@
 
   <Fragment>
     <DirectoryRef Id="DesktopFolder">
-      <Component Id="DesktopShortcut" Guid="6A395378-66D6-4986-97C6-8CF9423A066C">       
+      <Component Id="DesktopShortcut" Guid="3A24B19E-E692-4530-ABD8-6E7B737D2060">       
         <Shortcut Id="ProgramDesktopShortcut"
                   Name="$(var.ThetisName)"
                   Description="Run Thetis"
                   Target="[INSTALLFOLDER]Thetis.exe"
                   WorkingDirectory="INSTALLFOLDER" />
         <RegistryValue Root="HKLM" Key="Software\OpenHPSDR\$(var.ThetisName)"
+                Name="desktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+      <Component Id="DesktopShortcutHL2" Guid="2B5082FF-264C-481D-948D-1930362AAAFB">       
+        <Shortcut Id="ProgramDesktopShortcutHL2"
+                  Name="$(var.ThetisName)-HL2"
+                  Description="Run HL2 Thetis"
+                  Target="[INSTALLFOLDER]Thetis.exe"
+                  Arguments="-dbid:HL2"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKLM" Key="Software\OpenHPSDR\$(var.ThetisName)-HL2"
                 Name="desktopShortcut" Type="integer" Value="1" KeyPath="yes" />
       </Component>
     </DirectoryRef>
@@ -156,6 +167,13 @@
                   Name="$(var.ThetisName)"
                   Description="Run Thetis"
                   Target="[INSTALLFOLDER]Thetis.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  />
+        <Shortcut Id="ThetisShortcutHL2"
+                  Name="$(var.ThetisName)-HL2"
+                  Description="Run HL2 Thetis"
+                  Target="[INSTALLFOLDER]Thetis.exe"
+                  Arguments="-dbid:HL2"
                   WorkingDirectory="INSTALLFOLDER"
                   />
         <RemoveFolder Id="RemoveShortcutsDir" On="uninstall" />
@@ -393,7 +411,7 @@
 				  KeyPath="yes"
               />
 		</Component>
-		<!--
+		<!-- 
 		<Component Guid="*">
 			<File Id="System.IO.CompressionDLL"
 				  Source="$(var.FilesPath)System.IO.Compression.dll"
